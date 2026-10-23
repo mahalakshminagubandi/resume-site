@@ -1,0 +1,148 @@
+:root {
+  --bg: #eef3f2;
+  --paper: #ffffff;
+  --ink: #12262b;
+  --muted: #4d6469;
+  --teal: #0e5a63;
+  --teal-deep: #0a3f46;
+  --marigold: #e0a100;
+  --line: #c9d8d6;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Source Serif 4", Georgia, serif;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+a { color: inherit; }
+a:focus-visible { outline: 3px solid var(--marigold); outline-offset: 3px; }
+
+.page {
+  display: grid;
+  grid-template-columns: minmax(300px, 420px) 1fr;
+  min-height: 100vh;
+}
+
+/* ---------- Left panel ---------- */
+.side {
+  background: var(--teal-deep);
+  color: #eaf3f2;
+}
+.side-inner {
+  position: sticky;
+  top: 0;
+  padding: clamp(2rem, 5vw, 4rem) clamp(1.5rem, 3.5vw, 3rem);
+  max-height: 100vh;
+  overflow-y: auto;
+}
+h1 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(2.4rem, 4.6vw, 3.6rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 0 0 1rem;
+}
+.title {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 1.2rem;
+  margin: 0;
+  color: var(--marigold);
+}
+.location { margin: 0.2rem 0 2rem; color: #b8d0cd; }
+.summary { margin: 0 0 2rem; max-width: 36em; }
+
+.skills {
+  list-style: none;
+  margin: 0 0 2rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.skills li {
+  font-family: var(--display);
+  font-size: 0.95rem;
+  border: 1px solid #4b8a91;
+  border-radius: 999px;
+  padding: 0.25rem 0.9rem;
+}
+
+.contact { display: flex; flex-direction: column; gap: 0.4rem; margin: 0; }
+.contact a { text-decoration-color: var(--marigold); text-underline-offset: 4px; word-break: break-word; }
+.contact a:hover { color: var(--marigold); }
+
+/* ---------- Right panel ---------- */
+.main {
+  padding: clamp(2rem, 5vw, 4rem) clamp(1.25rem, 5vw, 4.5rem);
+  max-width: 60rem;
+}
+h2 {
+  font-family: var(--display);
+  font-size: 2rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 1.75rem;
+}
+h3 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.25;
+  margin: 0.15rem 0 0.1rem;
+}
+.company { margin: 0 0 0.5rem; color: var(--muted); }
+.job p:last-child, .edu li p:last-of-type { margin-bottom: 0; }
+
+.period {
+  font-family: var(--display);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--teal);
+}
+
+/* Timeline: a real sequence, so the line and dots carry meaning */
+.timeline {
+  list-style: none;
+  margin: 0 0 4rem;
+  padding: 0 0 0 1.75rem;
+  border-left: 2px solid var(--line);
+}
+.job { position: relative; padding-bottom: 2.25rem; }
+.job:last-child { padding-bottom: 0; }
+.job::before {
+  content: "";
+  position: absolute;
+  left: calc(-1.75rem - 7px);
+  top: 0.45rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--teal);
+}
+.job.current::before { background: var(--marigold); border-color: var(--marigold); }
+
+.edu { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.5rem; }
+.edu li { padding-left: 1rem; border-left: 4px solid var(--marigold); }
+.edu h3 { margin-top: 0; }
+
+/* ---------- Mobile ---------- */
+@media (max-width: 860px) {
+  .page { grid-template-columns: 1fr; }
+  .side-inner { position: static; max-height: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
