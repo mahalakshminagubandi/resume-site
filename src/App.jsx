@@ -1,4 +1,4 @@
-import { profile, experience, education } from "./data.js";
+import { profile, experience, education, press } from "./data.js";
 
 function Period({ start, end }) {
   return (
@@ -35,6 +35,52 @@ export default function App() {
       </header>
 
       <main className="main">
+        <section className="news" aria-labelledby="news-h">
+          <h2 id="news-h">In the news</h2>
+
+          <div className="media">
+            <figure>
+              <video
+                controls
+                playsInline
+                preload="metadata"
+                poster={press.video.poster}
+                aria-label={`${press.video.outlet}: ${press.video.title}`}
+              >
+                <source src={press.video.src} type="video/mp4" />
+                Your browser can't play this video.{" "}
+                <a href={press.video.src}>Download it instead</a>.
+              </video>
+              <figcaption>
+                <strong>{press.video.outlet}:</strong> {press.video.title}. {press.video.note}
+              </figcaption>
+            </figure>
+
+            <figure>
+              <a href={press.clipping.src} target="_blank" rel="noreferrer">
+                <img src={press.clipping.src} alt={press.clipping.alt} loading="lazy" />
+              </a>
+              <figcaption>
+                <strong>{press.clipping.title}.</strong> {press.clipping.note}
+              </figcaption>
+            </figure>
+          </div>
+
+          <ul className="articles">
+            {press.articles.map((a) => (
+              <li key={a.url}>
+                <p className="outlet">{a.outlet}</p>
+                <h3>
+                  <a href={a.url} target="_blank" rel="noreferrer">
+                    {a.title}
+                  </a>
+                </h3>
+                <p>{a.summary}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
         <section aria-labelledby="exp-h">
           <h2 id="exp-h">Experience</h2>
           <ol className="timeline">

@@ -83,3 +83,35 @@ export const education = [
   { school: "SKBR College, Amalapuram", degree: "Intermediate, Science", years: "1994 – 1996" },
   { school: "Paramjyothi Public School, Amalapuram", degree: "10th, ICSE", years: "1994" },
 ];
+
+export const press = {
+  video: {
+    src: "/press/idli-vending-machine.mp4",
+    poster: "/press/idli-vending-machine-poster.jpg",
+    outlet: "The Better India",
+    title: "This idli vending machine is wowing netizens",
+    note: "A short video on the idli vending machine from Meaningful Foods.",
+  },
+  clipping: {
+    src: "/press/doctor-who-loves-technology.png",
+    alt: "Newspaper clipping titled A doctor who loves technology, showing Mahalakshmi Nagubandi and Ayyappa Nagubandi with Broadcast Wear touch-enabled t-shirts.",
+    title: "A doctor who loves technology",
+    note: "A newspaper feature on my work at Broadcast Wear. Select the image to open it full size.",
+  },
+  articles: [
+    {
+      outlet: "The Indian Express",
+      title: "Like instant coffee, instant idli is also possible now",
+      summary:
+        "Ayyappa Nagubandi and I explain the idea of automating food, and why idli is such a good dish to start with.",
+      url: "https://indianexpress.com/article/lifestyle/food-wine/instant-coffee-instant-idli-possible-idli-machine-ayyappa-nagubandi-dr-mahalakshmi-nagubandi-south-indian-food-6045459/",
+    },
+    {
+      outlet: "The Economic Times",
+      title: "Smart apparel: This digital t-shirt allows you to customize slogans, image using your smartphone",
+      summary:
+        "Broadcast Wear, based in Hyderabad, wants to change wearable tech by taking out the extra accessories and building the technology into the clothes.",
+      url: "https://economictimes.indiatimes.com/small-biz/startups/features/smart-apparel-this-digital-t-shirt-allows-you-to-customize-slogans-image-using-your-smartphone-broadcastwear/articleshow/61859600.cms?from=mdr",
+    },
+  ],
+};
