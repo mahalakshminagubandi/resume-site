@@ -35,7 +35,36 @@ export const posts = [
   },
 ];
 
-export function readingTime(post) {
-  const words = post.paragraphs.join(" ").split(/\s+/).length;
+// Notes made in the admin have "blocks"; the starter notes above have "paragraphs".
+export function blocksOf(note) {
+  return note.blocks ?? note.paragraphs.map((text) => ({ type: "p", text }));
+}
+
+export function readingTime(note) {
+  const words = blocksOf(note)
+    .filter((b) => b.type === "p" || b.type === "h")
+    .map((b) => b.text)
+    .join(" ")
+    .split(/\s+/)
+    .filter(Boolean).length;
   return Math.max(1, Math.round(words / 200));
+}
+
+export function formatDate(date) {
+  if (!date) return "";
+  const d = new Date(`${date}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
+// Turns a starter note into the shape the admin saves.
+export function toSavedNote(post, date) {
+  return {
+    slug: post.slug,
+    title: post.title,
+    summary: post.summary,
+    date,
+    published: true,
+    blocks: blocksOf(post),
+  };
 }

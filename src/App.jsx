@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { profile, about, ventures, press, experience, education } from "./data.js";
-import { posts, readingTime } from "./posts.js";
+import { posts as starterPosts, blocksOf, formatDate, readingTime } from "./posts.js";
+import Admin from "./Admin.jsx";
 
 const SITE_TITLE = "Dr. Mahalakshmi Nagubandi – Naturopath, founder and builder";
 
@@ -14,6 +15,39 @@ function useHash() {
   }, []);
   return hash;
 }
+
+/* Reads the list of notes from the server. Until the admin has saved anything,
+   the starter notes from src/posts.js are shown instead. */
+function useNoteIndex() {
+  const [state, setState] = useState({ loaded: false, initialized: false, notes: [] });
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/notes")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("not ok"))))
+      .then((d) => {
+        if (!cancelled) setState({ loaded: true, initialized: Boolean(d.initialized), notes: d.notes || [] });
+      })
+      .catch(() => {
+        if (!cancelled) setState({ loaded: true, initialized: false, notes: [] });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const notes = state.initialized
+    ? state.notes
+    : starterPosts.map((p) => ({
+        slug: p.slug,
+        title: p.title,
+        summary: p.summary,
+        date: "",
+        minutes: readingTime(p),
+        cover: "",
+      }));
+  return { loaded: state.loaded, initialized: state.initialized, notes };
+}
+
+const safeSrc = (src) => (typeof src === "string" && src.startsWith("/media/") ? src : "");
 
 function Header() {
   return (
@@ -186,22 +220,34 @@ function News() {
   );
 }
 
-function Notes() {
+function Notes({ index }) {
   return (
     <section className="section alt" id="notes" aria-labelledby="notes-h">
       <div className="wrap split">
         <h2 id="notes-h">Notes</h2>
-        <ul className="notes">
-          {posts.map((p) => (
-            <li key={p.slug}>
-              <h3>
-                <a href={`#/notes/${p.slug}`}>{p.title}</a>
-              </h3>
-              <p>{p.summary}</p>
-              <p className="meta">{readingTime(p)} min read</p>
-            </li>
-          ))}
-        </ul>
+        {!index.loaded ? (
+          <p className="meta">Loading notes...</p>
+        ) : index.notes.length === 0 ? (
+          <p>New notes are coming soon.</p>
+        ) : (
+          <ul className="notes">
+            {index.notes.map((n) => (
+              <li key={n.slug} className={safeSrc(n.cover) ? "has-cover" : ""}>
+                <div>
+                  <h3>
+                    <a href={`#/notes/${n.slug}`}>{n.title}</a>
+                  </h3>
+                  {n.summary && <p>{n.summary}</p>}
+                  <p className="meta">
+                    {n.date ? `${formatDate(n.date)}, ` : ""}
+                    {n.minutes} min read
+                  </p>
+                </div>
+                {safeSrc(n.cover) && <img className="note-cover" src={safeSrc(n.cover)} alt="" loading="lazy" />}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </section>
   );
@@ -245,7 +291,65 @@ function Journey() {
   );
 }
 
-function Post({ post }) {
+function NoteBlocks({ blocks }) {
+  return blocks.map((b, i) => {
+    if (b.type === "h") {
+      return (
+        <h2 key={i} className="post-sub">
+          {b.text}
+        </h2>
+      );
+    }
+    if (b.type === "image" && safeSrc(b.src)) {
+      return (
+        <figure key={i} className="post-figure">
+          <img src={safeSrc(b.src)} alt={b.alt || ""} loading="lazy" />
+        </figure>
+      );
+    }
+    if (b.type === "video" && safeSrc(b.src)) {
+      return (
+        <figure key={i} className="post-figure">
+          <video controls playsInline preload="metadata" src={safeSrc(b.src)} aria-label={b.caption || "Video"} />
+          {b.caption && <figcaption>{b.caption}</figcaption>}
+        </figure>
+      );
+    }
+    if (b.type === "p") return <p key={i}>{b.text}</p>;
+    return null;
+  });
+}
+
+function PostPage({ slug, index }) {
+  const [state, setState] = useState({ status: "loading", note: null });
+
+  useEffect(() => {
+    if (!index.loaded) return undefined;
+    let cancelled = false;
+    if (!index.initialized) {
+      const starter = starterPosts.find((p) => p.slug === slug);
+      setState(starter ? { status: "ok", note: starter } : { status: "missing", note: null });
+      return undefined;
+    }
+    setState({ status: "loading", note: null });
+    fetch(`/api/notes/${slug}`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("missing"))))
+      .then((note) => {
+        if (!cancelled) setState({ status: "ok", note });
+      })
+      .catch(() => {
+        if (!cancelled) setState({ status: "missing", note: null });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, index.loaded, index.initialized]);
+
+  const note = state.note;
+  useEffect(() => {
+    document.title = note ? `${note.title} – ${profile.short}` : SITE_TITLE;
+  }, [note]);
+
   return (
     <main className="post">
       <article className="wrap-narrow">
@@ -254,53 +358,70 @@ function Post({ post }) {
             Back to all notes
           </a>
         </p>
-        <h1>{post.title}</h1>
-        <p className="meta">By {profile.name}, {readingTime(post)} min read</p>
-        <div className="prose post-body">
-          {post.paragraphs.map((t) => (
-            <p key={t.slice(0, 24)}>{t}</p>
-          ))}
-        </div>
-        <p className="post-end">
-          <a className="btn" href="#notes">
-            More notes
-          </a>
-        </p>
+        {state.status === "loading" && <p>Loading...</p>}
+        {state.status === "missing" && <p>This note could not be found.</p>}
+        {note && (
+          <>
+            <h1>{note.title}</h1>
+            <p className="meta">
+              By {profile.name}, {note.date ? `${formatDate(note.date)}, ` : ""}
+              {readingTime(note)} min read
+            </p>
+            <div className="prose post-body">
+              <NoteBlocks blocks={blocksOf(note)} />
+            </div>
+            <p className="post-end">
+              <a className="btn" href="#notes">
+                More notes
+              </a>
+            </p>
+          </>
+        )}
       </article>
     </main>
   );
 }
 
-export default function App() {
+function Site() {
   const hash = useHash();
-  const match = hash.match(/^#\/notes\/([\w-]+)$/);
-  const post = match ? posts.find((p) => p.slug === match[1]) : null;
+  const index = useNoteIndex();
+  const match = hash.match(/^#\/notes\/([a-z0-9-]+)$/);
+  const slug = match ? match[1] : null;
 
   useEffect(() => {
-    document.title = post ? `${post.title} – ${profile.short}` : SITE_TITLE;
-    if (post || hash === "" || hash.startsWith("#/")) {
+    if (slug) {
+      window.scrollTo(0, 0);
+      return;
+    }
+    document.title = SITE_TITLE;
+    if (hash === "" || hash.startsWith("#/")) {
       window.scrollTo(0, 0);
     } else {
       document.getElementById(hash.slice(1))?.scrollIntoView();
     }
-  }, [hash, post]);
+  }, [hash, slug, index.loaded]);
 
   return (
     <>
       <Header />
-      {post ? (
-        <Post post={post} />
+      {slug ? (
+        <PostPage slug={slug} index={index} />
       ) : (
         <main>
           <Hero />
           <About />
           <Built />
           <News />
-          <Notes />
+          <Notes index={index} />
           <Journey />
         </main>
       )}
       <Footer />
     </>
   );
+}
+
+export default function App() {
+  const isAdmin = window.location.pathname.replace(/\/+$/, "") === "/admin";
+  return isAdmin ? <Admin /> : <Site />;
 }
