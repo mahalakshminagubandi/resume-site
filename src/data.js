@@ -2,7 +2,7 @@ export const profile = {
   name: "Dr. Mahalakshmi Nagubandi",
   short: "Dr. Mahalakshmi",
   location: "Hyderabad, India",
-  email: "mahalakshmi@possibilliontech.com",
+  email: "mahalakshmi@neonflake.com",
   linkedin: "https://www.linkedin.com/in/mahalakshminagubandi",
   skills: ["Team management", "Customer relationship management", "Vendor management"],
 };
